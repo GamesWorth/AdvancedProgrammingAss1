@@ -6,8 +6,9 @@
 #include "player.h"
 
 void player_Initialise(Player * player, Position position){
-   	player->position.x=position.x;
+   	player->position.x = position.x;
 	player->position.y = position.y;
+	printf("\n--%d,%d--\n",position.x,position.y);
 	player->numArrows = INIT_ARROW_COUNT;
 }
 
@@ -17,8 +18,7 @@ Position player_GetNextPosition(Position position, Direction direction){
 	int X = position.x, Y = position.y;
 	printf("\n-%d,%d-\n",X,Y);
 	if(direction == player_NORTH){
-		//move up (y+1)
-		Y = Y+1;
+		Y = Y-1;
 	}
 	else if(direction == player_EAST){
 		//move right (x+1)
@@ -26,7 +26,7 @@ Position player_GetNextPosition(Position position, Direction direction){
 	}
 	else if(direction == player_SOUTH){
 		//move down (y -1)
-		Y = Y-1;
+		Y = Y+1;
 	}
 	else if(direction == player_WEST){
 		//move left (x -1)

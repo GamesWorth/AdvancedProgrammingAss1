@@ -61,7 +61,7 @@ Direction game_SetDirection(char input[]);
 //function to check if input is in array
 Boolean game_CheckIn(char input[],const char *array[]);
 //
-Position game_position(int x,int y);
+void game_position(Position * position,int x,int y);
 /* TODO not provided */
-void game_EqualPositions(Position pos1, Position pos2);
+void game_EqualPositions(Position * pos1, Position pos2);
 #endif

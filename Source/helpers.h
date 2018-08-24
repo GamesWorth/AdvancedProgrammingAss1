@@ -15,7 +15,7 @@
 typedef enum boolean
 {
 	FALSE = 0,
-	TRUE
+	TRUE = 1
 } Boolean;
 
 #define NEW_LINE_SPACE 1

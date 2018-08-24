@@ -36,21 +36,25 @@ void board_Load(Board board, Board boardToLoad) {
 
 Boolean board_PlacePlayer(Board board, Position position) {
 	int x = position.x,y = position.y;
+	//printf("\n(%d,%d\n)",x,y);
+	Boolean result;
 	if(board[y][x] == 0){
 		board[y][x] = 5;
 		printf("placed player\n");
-		return TRUE;
+		result  = 1;
+		printf("function val is : %d",result);
+		return result;
 	}
-
-   else{
-	   printf("cannot place player here\n");
-	   return FALSE;
+	else if (board[y][x] != 0){
+		result = FALSE;
+		printf("function val is : %d",result);
+		return 0;
    }
 }
 PlayerMove board_MovePlayer(Board board, Position playerPosition,Position nextPosition) {
 	
 	int nextX = nextPosition.x, nextY = nextPosition.y;	
-	//board[playerPosition.y][playerPosition.x] = board_TRAVERSED;
+	board[playerPosition.y][playerPosition.x] = 1;
  	
 	if(nextY<BOARD_HEIGHT && nextX<BOARD_WIDTH){//check if move is within board
   		

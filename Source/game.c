@@ -18,7 +18,7 @@ void game_PlayGame(){
 	
 	const char *DIRECTION_COMMANDS[DIR_COMMAND_AMOUNT] = {COMMAND_NORTH,COMMAND_NORTH_SHORTCUT,COMMAND_SOUTH,COMMAND_SOUTH_SHORTCUT,COMMAND_EAST,COMMAND_EAST_SHORTCUT,COMMAND_WEST,COMMAND_WEST_SHORTCUT};
 	char input[MAXLINE],command[MAXLINE], addon[MAXLINE];//string values, mainly for input handling
-	
+	Boolean val,inRange;
 	Board pBoard;
 	PlayerMove moveResult;//for handling move result
 	Player player;
@@ -29,36 +29,38 @@ void game_PlayGame(){
 		//generilised command scan, to get what the command is
 		sscanf( input, "%s", command);
 
-		if(strcmp(command,COMMAND_LOAD)==0){
-			sscanf( input, "%s %d", command, &x);
-			if(game_LoadBoard(pBoard,x) == TRUE){
-				state = board_LOADED;
-			}
+		if((strcmp(command,COMMAND_LOAD)==0)&&(sscanf( input, "%s %d", command, &x)==2)){
+				if(game_LoadBoard(pBoard,x) == TRUE){
+					state = board_LOADED;
+				}
 		}
+		
+		//check for init command
+		else if ((sscanf( input, "%s %d  %d", command, &x, &y) == 3)&&(strcmp(command,COMMAND_INIT)==0)){
+			if(state == board_LOADED && state != position_LOADED){	
+			inRange = game_PlacePlayer(pBoard,x,y);//try place player function checks if location is empty
+				printf(": returned value is %d\n",inRange);
+				if(inRange == 1){
+					game_position(&playerPos,x,y);
+					state = position_LOADED;//update state
 
-		else if (strcmp(command,COMMAND_INIT)==0){
-			
-			if(state == board_LOADED && state != position_LOADED){
-			sscanf( input, "%s %d  %d", command, &x, &y);
-				Boolean val = game_PlacePlayer(pBoard,x,y);
-				if(val==TRUE){
-					state = position_LOADED; 
-					player_Initialise(&player,game_position(x,y));
-					game_ShowBoard(pBoard,game_position(x,y));
-					game_EqualPositions(playerPos,game_position(x,y));
+					player_Initialise(&player,playerPos);//initialise player position
 					
-					printf("PlayerPos=(%d,%d)||(%d,%d)\n",x,y,playerPos.x,playerPos.y);
-					//printf("Player->position=(%d,%d)||(%d,%d)\n",x,y);
+					game_ShowBoard(pBoard,playerPos);//display board
+				}
+				else if(inRange == 0){
+					printf("Cannot place player here\n");
 				}
 			}else printf("\nPlease Load a board before initilising a position\n");
 		}
+		
 
-		else if (strcmp(command,COMMAND_SHOOT)==0){
+		else if (strcmp(command,COMMAND_SHOOT)==0 && sscanf( input, "%s %s", command, addon) == 2){
 			
 			if(state == position_LOADED){
-				sscanf( input, "%s %s", command, addon);
 				if(game_SetDirection(addon) == player_NULL){
 					//shoot arrow
+					printf("arrow shot at %s",addon);
 				}
 			}else printf("\nPlease Load Player Position before trying to fire an arrow\n");
 		}
@@ -76,7 +78,7 @@ void game_PlayGame(){
 				//game_EqualPositions(playerPos,player.position);
 
 				Position nextPos;
-				game_EqualPositions(nextPos,(player_GetNextPosition(playerPos, dMove)));
+				game_EqualPositions(&nextPos,(player_GetNextPosition(playerPos, dMove)));
 				moveResult = board_MovePlayer(pBoard,playerPos,nextPos);
 				
 				printf("moving player from (%d,%d) to (%d,%d)",playerPos.x,playerPos.y,nextPos.x,nextPos.y);
@@ -93,12 +95,15 @@ void game_PlayGame(){
 					Boolean val;
 					int bX;
 					int bY;
+					Position temp;
 					do{
 						bX = rand() % 5;
 						bY = rand() % 5;
-						val = game_PlacePlayer(pBoard,bX,bY);
+						game_position(&temp,bX,bY);
+						val = board_PlacePlayer(pBoard,temp);
 					}while(val != TRUE);
-					player_UpdatePosition(&player,game_position(bX,bY));
+					game_position(&playerPos,bX,bY);
+					player_UpdatePosition(&player,playerPos);
 				}
 				else if(moveResult == board_OUTSIDE_BOUNDS){
 					printf("Cannot move outside bounds, try another direction");
@@ -107,7 +112,10 @@ void game_PlayGame(){
 			
 		}
 		else printf("\nINVALID INPUT\n");
+		*input = 0;
+
 	}while(state != end_LOADED);
+	
 	srand(0);
 }
 
@@ -214,19 +222,16 @@ Boolean game_CheckIn(char input[],const char *array[]){
 	}
 	return FALSE;
 }
-Position game_position(int x,int y){
-	Position result;
-	result.x = x;
-	result.y = y;
-	printf("\nPOS %d,%d\n",result.x,result.y);
+void game_position(Position * position,int x,int y){
+	position->x = x;
+	position->y = y;
+	printf("\nPOS %d,%d\n",position->x,position->y);
 }
-void game_EqualPositions(Position pos1, Position pos2){
+void game_EqualPositions(Position* pos1, Position pos2){
 	//makes pos1 = pos2
 	int x = pos2.x;
 	int y = pos2.y;
-	pos1.x=x;
-	printf("X|pos1 %d,pos2 %d|",pos1.x,pos2.x);
-	pos1.y=y;
-	printf("Y|pos1 %d,pos2 %d|",pos1.y,pos2.y);
+	pos1->x=x;
+	pos1->y=y;
 
 }
